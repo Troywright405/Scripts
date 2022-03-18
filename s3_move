@@ -1,0 +1,24 @@
+## S3 move ##
+
+import boto3
+import datetime
+
+def lambda_handler(event, context):
+    s3 = boto3.resource('s3')
+    current_year = datetime.datetime.now().year
+    
+    source_bucket_plain = '<Name of Bucket>'
+    destination_bucket_plain = '<Name of Bucket>'
+    
+    source_bucket = s3.Bucket(source_bucket_plain)
+    destination_bucket = s3.Bucket(destination_bucket_plain)
+    
+    
+    for file in source_bucket.objects.all() :
+        copy_source = {
+            'Bucket': source_bucket_plain,
+            'Key': file.key
+        }
+        destination_bucket.copy(copy_source, f'{str(current_year)}/{str(file.key)}')
+        delete_object = s3.Object(source_bucket_plain, file.key)
+        delete_object.delete()
